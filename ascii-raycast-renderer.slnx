@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="ascii-raycast-renderer/ascii-raycast-renderer.vcxproj" Id="1d79c2dd-208f-474e-aa52-2ef0d42fa56a" />
+</Solution>

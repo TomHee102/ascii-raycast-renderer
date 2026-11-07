@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <Windows.h>
+#include <chrono>
 #include "render.h"
 #include "game.h"
 
@@ -55,7 +56,7 @@ void Raycast(wchar_t* screenBuffer)
 		/*
 		* Calculate the height of the ceiling and floor (cutoff) based on distance from wall hit.
 		*/
-		float fCeiling = ((float)Screen.nHeight / 2) - ((float)Screen.nHeight / fDistance);
+		float fCeiling = ((float)Screen.nHeight / 2) - ((float)Screen.nHeight / fDistance * 0.5f);
 		float fFloor = (float)Screen.nHeight - fCeiling;
 
 		/*
@@ -76,11 +77,11 @@ void Raycast(wchar_t* screenBuffer)
 				{
 					screenBuffer[nBufferIndex] = L'\u2588';
 				}
-				else if (fDistance < 8)
+				else if (fDistance < 6)
 				{
 					screenBuffer[nBufferIndex] = L'\u2593';
 				}
-				else if (fDistance < 12)
+				else if (fDistance < 8)
 				{
 					screenBuffer[nBufferIndex] = L'\u2592';
 				}
@@ -100,27 +101,27 @@ void Raycast(wchar_t* screenBuffer)
 int main()
 {
 	//Initialise attributes
-	Screen.nWidth = 120;
-	Screen.nHeight = 40;
+	Screen.nWidth = 150;
+	Screen.nHeight = 50;
 
 	Room.nHeight = 16;
 	Room.nWidth = 16;
 
 	Room.cells += L"################";
-	Room.cells += L"###......#.....#";
-	Room.cells += L"###......#.....#";
-	Room.cells += L"#...........#..#";
-	Room.cells += L"#...........#..#";
+	Room.cells += L"#..............#";
+	Room.cells += L"######.........#";
+	Room.cells += L"#.......##.....#";
+	Room.cells += L"#.......##.....#";
 	Room.cells += L"#...........####";
 	Room.cells += L"#..............#";
 	Room.cells += L"#..............#";
 	Room.cells += L"#..............#";
 	Room.cells += L"####...........#";
-	Room.cells += L"#.........###..#";
-	Room.cells += L"#.........###..#";
-	Room.cells += L"#.........######";
-	Room.cells += L"#..............#";
-	Room.cells += L"#..............#";
+	Room.cells += L"#.........#....#";
+	Room.cells += L"#.........#....#";
+	Room.cells += L"#.........#....#";
+	Room.cells += L"#.........#....#";
+	Room.cells += L"#.........#....#";
 	Room.cells += L"################";
 
 	Player.fX = 8;
@@ -132,13 +133,42 @@ int main()
 	SetConsoleActiveScreenBuffer(hConsole);
 	DWORD dwBytesWritten = 0;
 
+	//Initialise time vars
+	auto lastFrameTime = chrono::system_clock::now();
+	float deltaTime = 0;
+
 	//Render loop
 	while (true)
 	{
+		//Calculate delta time
+		deltaTime = chrono::duration<float>(chrono::system_clock::now() - lastFrameTime).count();
+		lastFrameTime = chrono::system_clock::now();
+
+		//Inpput and Movement
+		if (GetAsyncKeyState('W') & 0x8000)
+		{
+			Player.fX += cos(Player.fAngle) * 5 * deltaTime;
+			Player.fY += sin(Player.fAngle) * 5 * deltaTime;
+		};
+
+		if (GetAsyncKeyState('S') & 0x8000)
+		{
+			Player.fX -= cos(Player.fAngle) * 5 * deltaTime;
+			Player.fY -= sin(Player.fAngle) * 5 * deltaTime;
+		};
+
+		if (GetAsyncKeyState('A') & 0x8000)
+		{
+			Player.fAngle -= 2.5 * deltaTime;
+		}
+
+		if (GetAsyncKeyState('D') & 0x8000)
+		{
+			Player.fAngle += 2.5 * deltaTime;
+		}
+
 		//Raycast
 		Raycast(screenBuffer);
-
-		Player.fAngle += 0.0005;
 
 		//Draw
 		screenBuffer[Screen.nWidth * Screen.nHeight - 1] = '\0';
